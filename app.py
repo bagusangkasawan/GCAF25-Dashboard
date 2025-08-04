@@ -24,20 +24,16 @@ st.sidebar.markdown(f"**📅 Data Tanggal:** `{file_date}`")
 # --- Load Data ---
 df = pd.read_csv(latest_file)
 
-# --- Tambahkan Kolom Total Badge ---
-if all(col in df.columns for col in [
-    '# Jumlah Skill Badge yang Diselesaikan',
-    '# Jumlah Game Arcade yang Diselesaikan',
-    '# Jumlah Game Trivia yang Diselesaikan'
-]):
-    df['Total Badge'] = (
-        df['# Jumlah Skill Badge yang Diselesaikan'].fillna(0) +
-        df['# Jumlah Game Arcade yang Diselesaikan'].fillna(0) +
-        df['# Jumlah Game Trivia yang Diselesaikan'].fillna(0)
-    )
-else:
-    st.warning("❗ Kolom-kolom penghitungan Total Badge tidak lengkap.")
-    st.stop()
+# --- Tambahkan Kolom Total Poin ---
+df['# Jumlah Skill Badge yang Diselesaikan'] = df['# Jumlah Skill Badge yang Diselesaikan'].fillna(0)
+df['# Jumlah Game Arcade yang Diselesaikan'] = df['# Jumlah Game Arcade yang Diselesaikan'].fillna(0)
+df['# Jumlah Game Trivia yang Diselesaikan'] = df['# Jumlah Game Trivia yang Diselesaikan'].fillna(0)
+
+df['Total Poin'] = (
+    (df['# Jumlah Skill Badge yang Diselesaikan'] // 2) +
+    df['# Jumlah Game Arcade yang Diselesaikan'] +
+    df['# Jumlah Game Trivia yang Diselesaikan']
+)
 
 # --- Sidebar: Lihat detail peserta ---
 st.sidebar.markdown("---")
@@ -52,14 +48,14 @@ st.sidebar.markdown("### 🎯 Rincian Badge")
 st.sidebar.markdown(f"- **Skill Badge:** {int(peserta_data['# Jumlah Skill Badge yang Diselesaikan'])}")
 st.sidebar.markdown(f"- **Game Arcade:** {int(peserta_data['# Jumlah Game Arcade yang Diselesaikan'])}")
 st.sidebar.markdown(f"- **Game Trivia:** {int(peserta_data['# Jumlah Game Trivia yang Diselesaikan'])}")
-st.sidebar.markdown(f"---\n**Total Badge:** 🎖️ `{int(peserta_data['Total Badge'])}`")
+st.sidebar.markdown(f"---\n**Total Poin:** 🎖️ `{int(peserta_data['Total Poin'])}`")
 
 # --- Judul Halaman ---
-st.title("🏅 GCAF25 - Total Badge Peserta yang Difasilitasi oleh Bagus Angkasawan Sumantri Putra")
+st.title("🏅 GCAF25 - Total Poin Peserta yang Difasilitasi oleh Bagus Angkasawan Sumantri Putra")
 st.caption(f"Menampilkan data dari: `{os.path.basename(latest_file)}`")
 
 # --- Ambil Top 3 Peserta ---
-top_3 = df[df['Total Badge'] > 0].sort_values(by='Total Badge', ascending=False).head(3).reset_index(drop=True)
+top_3 = df[df['Total Poin'] > 0].sort_values(by='Total Poin', ascending=False).head(3).reset_index(drop=True)
 
 if top_3.empty:
     st.warning("Belum ada peserta yang memiliki badge.")
@@ -104,7 +100,7 @@ else:
                         text-overflow: ellipsis;
                         color: #333;
                     " title="{row._1}">{row._1}</div>
-                    <div style="font-size: 18px; color: #444;">🏅 <b>{int(row._14)} badge</b></div>
+                    <div style="font-size: 18px; color: #444;">🏅 <b>{int(row._14)} poin</b></div>
                 </div>
                 """,
                 unsafe_allow_html=True
@@ -117,9 +113,9 @@ st.markdown("### 🧾 Daftar Peserta Lainnya")
 # Ambil nama Top 3 (kolom pertama diasumsikan nama peserta)
 top_3_names = top_3.iloc[:, 0].tolist()
 
-# Filter peserta lain (Total Badge > 0 dan bukan Top 3)
-others = df[(df['Total Badge'] > 0) & (~df.iloc[:, 0].isin(top_3_names))]
-others = others.sort_values(by='Total Badge', ascending=False).reset_index(drop=True)
+# Filter peserta lain (Total Poin > 0 dan bukan Top 3)
+others = df[(df['Total Poin'] > 0) & (~df.iloc[:, 0].isin(top_3_names))]
+others = others.sort_values(by='Total Poin', ascending=False).reset_index(drop=True)
 
 if others.empty:
     st.info("Tidak ada peserta lain dengan badge > 0.")
@@ -156,7 +152,7 @@ else:
                         text-overflow: ellipsis;
                         margin-bottom: 8px;
                     " title="{row[nama_kolom]}">{row[nama_kolom]}</div>
-                    <div style="font-size: 16px; color: #444;">🏅 {int(row['Total Badge'])} badge</div>
+                    <div style="font-size: 16px; color: #444;">🏅 {int(row['Total Poin'])} poin</div>
                 </div>
                 """,
                 unsafe_allow_html=True
