@@ -48,7 +48,7 @@ st.sidebar.markdown("### 🎯 Rincian Badge")
 st.sidebar.markdown(f"- **Skill Badge:** {int(peserta_data['# Jumlah Skill Badge yang Diselesaikan'])}")
 st.sidebar.markdown(f"- **Game Arcade:** {int(peserta_data['# Jumlah Game Arcade yang Diselesaikan'])}")
 st.sidebar.markdown(f"- **Game Trivia:** {int(peserta_data['# Jumlah Game Trivia yang Diselesaikan'])}")
-st.sidebar.markdown(f"---\n**Total Poin:** 🎖️ `{int(peserta_data['Total Poin'])}`")
+st.sidebar.markdown(f"---\n**Total Poin:** 🎖️ {int(peserta_data['Total Poin'])}")
 
 # --- Judul Halaman ---
 st.title("🏅 GCAF25 - Total Poin Peserta yang Difasilitasi oleh Bagus Angkasawan Sumantri Putra")
@@ -157,3 +157,76 @@ else:
                 """,
                 unsafe_allow_html=True
             )
+
+# --- Milestone Validation ---
+st.markdown("---")
+st.markdown("## 🏆 Pencapaian Milestone Peserta")
+
+# Definisikan milestone
+def tentukan_milestone(skill, arcade, trivia):
+    if skill >= 44 and arcade >= 10 and trivia >= 8:
+        return "🏆 Ultimate Milestone"
+    elif skill >= 30 and arcade >= 8 and trivia >= 7:
+        return "🥇 Milestone #3"
+    elif skill >= 20 and arcade >= 6 and trivia >= 6:
+        return "🥈 Milestone #2"
+    elif skill >= 10 and arcade >= 4 and trivia >= 4:
+        return "🥉 Milestone #1"
+    else:
+        return None
+
+# Tambahkan kolom milestone
+df['Milestone'] = df.apply(lambda row: tentukan_milestone(
+    row['# Jumlah Skill Badge yang Diselesaikan'],
+    row['# Jumlah Game Arcade yang Diselesaikan'],
+    row['# Jumlah Game Trivia yang Diselesaikan']
+), axis=1)
+
+# Tampilkan peserta berdasarkan milestone tertinggi
+milestone_order = [
+    "🏆 Ultimate Milestone",
+    "🥇 Milestone #3",
+    "🥈 Milestone #2",
+    "🥉 Milestone #1"
+]
+
+for milestone in milestone_order:
+    peserta_milestone = df[df['Milestone'] == milestone]
+    st.markdown(f"### {milestone}")
+
+    if peserta_milestone.empty:
+        st.info(f"Belum ada peserta yang memenuhi {milestone}.")
+    else:
+        st.markdown(f"**Jumlah Peserta:** {len(peserta_milestone)}")
+
+        peserta_milestone = peserta_milestone.reset_index(drop=True)
+        for i in range(0, len(peserta_milestone), 3):
+            baris = peserta_milestone.iloc[i:i+3]
+            cols = st.columns(len(baris)) 
+            for j in range(len(baris)):
+                row = baris.iloc[j]
+                with cols[j]:
+                    st.markdown(
+                        f"""
+                        <div style="
+                            background-color: #ffffff;
+                            border-left: 6px solid #00838F;
+                            border-radius: 10px;
+                            padding: 14px;
+                            margin-bottom: 16px;
+                            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+                            text-align: left;
+                            color: #222;
+                        ">
+                            <div style="font-size: 16px; font-weight: bold; color: #004D40;">
+                                {row[nama_kolom]}
+                            </div>
+                            <div style="font-size: 14px; margin-top: 4px;">📘 Skill Badge: <b>{int(row['# Jumlah Skill Badge yang Diselesaikan'])}</b></div>
+                            <div style="font-size: 14px;">🕹️ Arcade Game: <b>{int(row['# Jumlah Game Arcade yang Diselesaikan'])}</b></div>
+                            <div style="font-size: 14px;">❓ Trivia Game: <b>{int(row['# Jumlah Game Trivia yang Diselesaikan'])}</b></div>
+                            <div style="font-size: 14px; margin-top: 6px;">🎯 Total Poin: <b>{int(row['Total Poin'])}</b></div>
+                        </div>
+                        """,
+                        unsafe_allow_html=True
+                    )
+
