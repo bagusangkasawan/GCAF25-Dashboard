@@ -54,6 +54,45 @@ st.sidebar.markdown(f"---\n**Total Poin:** 🎖️ {int(peserta_data['Total Poin
 st.title("🏅 GCAF25 - Total Poin Peserta yang Difasilitasi oleh Bagus Angkasawan Sumantri Putra")
 st.caption(f"Menampilkan data dari: `{os.path.basename(latest_file)}`")
 
+# --- Custom CSS untuk styling ---
+st.markdown("""
+<style>
+.top3-card {
+    padding: 24px;
+    border-radius: 18px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    min-height: 240px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.top3-card:hover {
+    transform: scale(1.03);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+}
+.peserta-card {
+    background-color: #f5f5f5;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    text-align: center;
+    height: 140px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    transition: transform 0.2s;
+}
+.peserta-card:hover {
+    transform: scale(1.02);
+}
+</style>
+""", unsafe_allow_html=True)
+
 # --- Ambil Top 3 Peserta ---
 top_3 = df[df['Total Poin'] > 0].sort_values(by='Total Poin', ascending=False).head(3).reset_index(drop=True)
 
@@ -72,23 +111,7 @@ else:
         with col:
             st.markdown(
                 f"""
-                <div style="
-                    background: linear-gradient(135deg, {colors[i]}, #ffffff);
-                    padding: 24px;
-                    border-radius: 18px;
-                    text-align: center;
-                    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-                    transition: transform 0.3s ease, box-shadow 0.3s ease;
-                    cursor: default;
-                    min-height: 240px;
-                    height: 100%;
-                    display: flex;
-                    flex-direction: column;
-                    justify-content: center;
-                    align-items: center;
-                " onmouseover="this.style.transform='scale(1.03)'; this.style.boxShadow='0 6px 18px rgba(0,0,0,0.15)';"
-                  onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.1)';"
-                >
+                <div class="top3-card" style="background: linear-gradient(135deg, {colors[i]}, #ffffff);">
                     <div style="font-size: 52px; margin-bottom: 12px;">{medals[i]}</div>
                     <div style="
                         font-size: 20px;
@@ -128,21 +151,7 @@ else:
         with col:
             st.markdown(
                 f"""
-                <div style="
-                    background-color: #f5f5f5;
-                    border-radius: 12px;
-                    padding: 16px;
-                    margin-bottom: 16px;
-                    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-                    text-align: center;
-                    height: 140px;
-                    display: flex;
-                    flex-direction: column;
-                    justify-content: center;
-                    transition: transform 0.2s;
-                " onmouseover="this.style.transform='scale(1.02)';"
-                  onmouseout="this.style.transform='scale(1)';"
-                >
+                <div class="peserta-card">
                     <div style="
                         font-size: 18px;
                         font-weight: 600;
@@ -161,6 +170,7 @@ else:
 # --- Milestone Validation ---
 st.markdown("---")
 st.markdown("## 🏆 Pencapaian Milestone Peserta")
+st.caption("Untuk detail milestone, silakan lihat [Sistem Poin](https://rsvp.withgoogle.com/events/arcade-fasilitator-id/sistem-poin).")
 
 # Definisikan milestone
 def tentukan_milestone(skill, arcade, trivia):
@@ -190,14 +200,25 @@ milestone_order = [
     "🥉 Milestone #1"
 ]
 
-for milestone in milestone_order:
+# Hitung jumlah peserta per milestone
+milestone_counts = [(m, len(df[df['Milestone'] == m])) for m in milestone_order]
+
+# Pisahkan milestone yang ada pesertanya vs yang kosong
+milestone_nonempty = [m for m, count in sorted(milestone_counts, key=lambda x: -x[1]) if count > 0]
+milestone_empty = [m for m, count in milestone_counts if count == 0]
+
+# Gabungkan ulang urutannya
+milestone_order_urut = milestone_nonempty + milestone_empty
+
+# Tampilkan milestone berdasarkan urutan baru
+for milestone in milestone_order_urut:
     peserta_milestone = df[df['Milestone'] == milestone]
     st.markdown(f"### {milestone}")
 
     if peserta_milestone.empty:
         st.info(f"Belum ada peserta yang memenuhi {milestone}.")
     else:
-        st.markdown(f"**Jumlah Peserta:** {len(peserta_milestone)}")
+        st.markdown(f"<span style='color: white; font-weight: bold;'>Jumlah Peserta: {len(peserta_milestone)}</span>", unsafe_allow_html=True)
 
         peserta_milestone = peserta_milestone.reset_index(drop=True)
         for i in range(0, len(peserta_milestone), 3):
@@ -229,4 +250,3 @@ for milestone in milestone_order:
                         """,
                         unsafe_allow_html=True
                     )
-
