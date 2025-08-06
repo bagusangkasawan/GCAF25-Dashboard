@@ -218,7 +218,7 @@ for milestone in milestone_order_urut:
     if peserta_milestone.empty:
         st.info(f"Belum ada peserta yang memenuhi {milestone}.")
     else:
-        st.markdown(f"<span style='color: white; font-weight: bold;'>Jumlah Peserta: {len(peserta_milestone)}</span>", unsafe_allow_html=True)
+        st.markdown(f"<span style='font-weight: bold;'>Jumlah Peserta: {len(peserta_milestone)}</span>", unsafe_allow_html=True)
 
         peserta_milestone = peserta_milestone.reset_index(drop=True)
         for i in range(0, len(peserta_milestone), 3):
