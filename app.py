@@ -192,6 +192,20 @@ df['Milestone'] = df.apply(lambda row: tentukan_milestone(
     row['# Jumlah Game Trivia yang Diselesaikan']
 ), axis=1)
 
+# Mapping bonus poin per milestone
+bonus_poin = {
+    "🥉 Milestone #1": 7,
+    "🥈 Milestone #2": 14,
+    "🥇 Milestone #3": 19,
+    "🏆 Ultimate Milestone": 28
+}
+
+# Tambahkan kolom Bonus Poin
+df['Bonus Poin'] = df['Milestone'].map(bonus_poin).fillna(0)
+
+# Update Total Poin dengan bonus milestone
+df['Total Poin'] = df['Total Poin'] + df['Bonus Poin']
+
 # Tampilkan peserta berdasarkan milestone tertinggi
 milestone_order = [
     "🏆 Ultimate Milestone",
@@ -245,6 +259,7 @@ for milestone in milestone_order_urut:
                             <div style="font-size: 14px; margin-top: 4px;">📘 Skill Badge: <b>{int(row['# Jumlah Skill Badge yang Diselesaikan'])}</b></div>
                             <div style="font-size: 14px;">🕹️ Arcade Game: <b>{int(row['# Jumlah Game Arcade yang Diselesaikan'])}</b></div>
                             <div style="font-size: 14px;">❓ Trivia Game: <b>{int(row['# Jumlah Game Trivia yang Diselesaikan'])}</b></div>
+                            <div style="font-size: 14px;">➕ Bonus Poin: <b>{int(row['Bonus Poin'])}</b></div>
                             <div style="font-size: 14px; margin-top: 6px;">🎯 Total Poin: <b>{int(row['Total Poin'])}</b></div>
                         </div>
                         """,
